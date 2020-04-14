@@ -31,6 +31,9 @@
 #define LCD_RD PE_1
 int DPINS[] = {PB_0, PB_1, PB_2, PB_3, PB_4, PB_5, PB_6, PB_7};
 int estado = 0;
+int pulsado_start = 0;
+int push1 = 1;
+int y = 0;
 //***************************************************************************************************************************************
 // Functions Prototypes
 //***************************************************************************************************************************************
@@ -89,12 +92,30 @@ void setup() {
 void loop() {
   switch (estado) {
     case 0:
-      for (int x = 0; x < 6; x++) {
+      for (int x = 0; x < 42; x++) {
+        push1 = digitalRead(PF_4);
         delay(100);
-
+        if (pulsado_start == 1 && push1 == 1) {
+          x = 0;
+          estado++;
+          delay(50);
+          pulsado_start = 0;
+        }
         int anim_cube = x % 6;
-        LCD_Sprite(145, 53, 32, 32, cubesat, 6, anim_cube, 0, 0);
+
+        if (estado == 1) {
+          y = 4 * x;
+          LCD_Sprite(145+y, 53, 32, 32, cubesat, 6, anim_cube, 0, 0);
+        } else {
+          LCD_Sprite(145, 53, 32, 32, cubesat, 6, anim_cube, 0, 0);
+        }
+
+        if (push1 == 0 && pulsado_start == 0) {
+          pulsado_start = 1;
+        }
       }
+    case 1:
+      estado = 0;
 
 
   }
