@@ -30,7 +30,7 @@
 #define LCD_WR PD_3
 #define LCD_RD PE_1
 int DPINS[] = {PB_0, PB_1, PB_2, PB_3, PB_4, PB_5, PB_6, PB_7};
-int estado= 0;
+int estado = 0;
 //***************************************************************************************************************************************
 // Functions Prototypes
 //***************************************************************************************************************************************
@@ -60,29 +60,30 @@ void setup() {
   LCD_Clear(0x00);
 
   String text1 = "Quetzal I";
-  LCD_Print(text1, 90, 150, 2, 0xffff, 0x0000);
+  String ini_text = "press START";
+  LCD_Print(text1, 90, 100, 2, 0xffff, 0x0000);
+  LCD_Print(ini_text, 80, 150, 2, 0xffff, 0x0000);
   //LCD_Sprite(int x, int y, int width, int height, unsigned char bitmap[],int columns, int index, char flip, char offset);
 
   //LCD_Bitmap(unsigned int x, unsigned int y, unsigned int width, unsigned int height, unsigned char bitmap[]);
-  //LCD_Bitmap(50,50, 192, 32, cubesat);
-  /*
-    for(int x = 0; x <319; x++){
-    LCD_Bitmap(x, 207, 16, 16, tile);
-    LCD_Bitmap(x, 223, 16, 16, tile);
-    x += 15;
-    }*/
 
 }
 //***************************************************************************************************************************************
 // Loop Infinito
 //***************************************************************************************************************************************
 void loop() {
-  for (int x = 0; x < 6; x++) {
-    delay(100);
+  switch (estado) {
+    case 0:
+      for (int x = 0; x < 6; x++) {
+        delay(100);
 
-    int anim_cube = x % 6;
-    LCD_Sprite(145, 103, 32, 32, cubesat, 6, anim_cube, 0, 0);
+        int anim_cube = x % 6;
+        LCD_Sprite(145, 53, 32, 32, cubesat, 6, anim_cube, 0, 0);
+      }
+      
+      
   }
+
   /*
     for(int x = 0; x <320-32; x++){
     delay(15);
