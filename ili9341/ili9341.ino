@@ -55,14 +55,29 @@ void setup() {
   SysCtlClockSet(SYSCTL_SYSDIV_2_5 | SYSCTL_USE_PLL | SYSCTL_OSC_MAIN | SYSCTL_XTAL_16MHZ);
   Serial.begin(9600);
   GPIOPadConfigSet(GPIO_PORTB_BASE, 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7, GPIO_STRENGTH_8MA, GPIO_PIN_TYPE_STD_WPU);
-  Serial.println("Inicio");
+  pinMode(PF_4, INPUT_PULLUP);
   LCD_Init();
   LCD_Clear(0x00);
-
+  String ponce = "Jose Ponce";
+  String isra = "Israel Arevalo";
+  LCD_Print(ponce, 80, 60, 2, 0xffff, 0x0000);
+  LCD_Print(isra, 50, 130, 2, 0xffff, 0x0000);
+  delay(2000);
+  LCD_Clear(0x00);
   String text1 = "Quetzal I";
-  String ini_text = "press START";
-  LCD_Print(text1, 90, 100, 2, 0xffff, 0x0000);
+  String ini_text = "Press START";
+  String dot = ".";
+  LCD_Print(text1, 100, 90, 2, 0xffff, 0x0000);
   LCD_Print(ini_text, 80, 150, 2, 0xffff, 0x0000);
+
+  LCD_Print(dot, 20, 20, 1, 0xffff, 0x0000);
+  LCD_Print(dot, 100, 180, 1, 0xffff, 0x0000);
+  LCD_Print(dot, 60, 10, 1, 0xffff, 0x0000);
+  LCD_Print(dot, 300, 200, 1, 0xffff, 0x0000);
+  LCD_Print(dot, 270, 80, 1, 0xffff, 0x0000);
+  LCD_Print(dot, 10, 220, 1, 0xffff, 0x0000);
+  LCD_Print(dot, 230, 40, 1, 0xffff, 0x0000);
+
   //LCD_Sprite(int x, int y, int width, int height, unsigned char bitmap[],int columns, int index, char flip, char offset);
 
   //LCD_Bitmap(unsigned int x, unsigned int y, unsigned int width, unsigned int height, unsigned char bitmap[]);
@@ -80,8 +95,8 @@ void loop() {
         int anim_cube = x % 6;
         LCD_Sprite(145, 53, 32, 32, cubesat, 6, anim_cube, 0, 0);
       }
-      
-      
+
+
   }
 
   /*
