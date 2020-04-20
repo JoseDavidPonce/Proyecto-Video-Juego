@@ -105,7 +105,11 @@ void loop() {
 
         if (estado == 1) {
           y = 4 * x;
-          LCD_Sprite(145+y, 53, 32, 32, cubesat, 6, anim_cube, 0, 0);
+          LCD_Sprite(145 + y, 53, 32, 32, cubesat, 6, anim_cube, 0, 0);
+          if ( y > 135) {
+            x = 42;
+            LCD_Clear(0x00);
+          }
         } else {
           LCD_Sprite(145, 53, 32, 32, cubesat, 6, anim_cube, 0, 0);
         }
@@ -114,8 +118,8 @@ void loop() {
           pulsado_start = 1;
         }
       }
-    case 1:
-      estado = 0;
+    //case 1:
+      //LCD_Sprite(0, 53, 32, 32, rotating, 8, etapa, 0, 0);
 
 
   }
