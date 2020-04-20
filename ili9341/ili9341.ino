@@ -64,10 +64,10 @@ void setup() {
   LCD_Init();
   LCD_Clear(0x00);
   /*String ponce = "Jose Ponce";
-  String isra = "Israel Arevalo";
-  LCD_Print(ponce, 80, 60, 2, 0xffff, 0x0000);
-  LCD_Print(isra, 50, 130, 2, 0xffff, 0x0000);
-  delay(2000);*/
+    String isra = "Israel Arevalo";
+    LCD_Print(ponce, 80, 60, 2, 0xffff, 0x0000);
+    LCD_Print(isra, 50, 130, 2, 0xffff, 0x0000);
+    delay(2000);*/
   LCD_Clear(0x00);
   String text1 = "Quetzal I";
   String ini_text = "Press START";
@@ -130,15 +130,47 @@ void loop() {
         delay(50);
       }
       estado++;
-      
+
       break;
     case 2:
       coordx = 144;
       coordy = 53;
-      for (int x = 0; x < 320; x++) {
+      for (int x = 0; x < 680; x++) {
         int anim_rot = (x / 80) % 8;
         LCD_Sprite(coordx, coordy, 32, 32, rotating, 8, anim_rot, 0, 0);
-        FillRect(coordx - 1, coordy, 1, 32, 0x00);
+        V_line(coordx - 1, coordy, 32, 0x00);
+        push1 = digitalRead(PF_4);
+        while (push1 == 0) {
+          switch (anim_rot) {
+            case 0:
+              LCD_Sprite(coordx, coordy++, 32, 32, rotating, 8, anim_rot, 0, 0);
+              break;
+            case 1:
+              LCD_Sprite(coordx--, coordy++, 32, 32, rotating, 8, anim_rot, 0, 0);
+              break;
+            case 2:
+              LCD_Sprite(coordx--, coordy, 32, 32, rotating, 8, anim_rot, 0, 0);
+              break;
+            case 3:
+              LCD_Sprite(coordx--, coordy--, 32, 32, rotating, 8, anim_rot, 0, 0);
+              break;
+            case 4:
+              LCD_Sprite(coordx, coordy--, 32, 32, rotating, 8, anim_rot, 0, 0);
+              break;
+            case 5:
+              LCD_Sprite(coordx++, coordy--, 32, 32, rotating, 8, anim_rot, 0, 0);
+              break;
+            case 6:
+              LCD_Sprite(coordx++, coordy, 32, 32, rotating, 8, anim_rot, 0, 0);
+              break;
+            case 7:
+              LCD_Sprite(coordx++, coordy++, 32, 32, rotating, 8, anim_rot, 0, 0);
+              break;
+            default:
+              break;
+              push1 = digitalRead(PF_4);
+          }
+        }
 
       }
 
