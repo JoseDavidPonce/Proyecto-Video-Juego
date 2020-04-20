@@ -32,8 +32,9 @@
 int DPINS[] = {PB_0, PB_1, PB_2, PB_3, PB_4, PB_5, PB_6, PB_7};
 int estado = 0;
 int pulsado_start = 0;
-int push1;
+int push1 = 1;
 int y = 0;
+int coordx, coordy;
 //***************************************************************************************************************************************
 // Functions Prototypes
 //***************************************************************************************************************************************
@@ -62,11 +63,11 @@ void setup() {
   pinMode(PF_0, INPUT_PULLUP);
   LCD_Init();
   LCD_Clear(0x00);
-  String ponce = "Jose Ponce";
+  /*String ponce = "Jose Ponce";
   String isra = "Israel Arevalo";
   LCD_Print(ponce, 80, 60, 2, 0xffff, 0x0000);
   LCD_Print(isra, 50, 130, 2, 0xffff, 0x0000);
-  delay(2000);
+  delay(2000);*/
   LCD_Clear(0x00);
   String text1 = "Quetzal I";
   String ini_text = "Press START";
@@ -99,7 +100,6 @@ void loop() {
         if (pulsado_start == 1 && push1 == 1) {
           x = 0;
           estado++;
-          delay(50);
           pulsado_start = 0;
         }
         int anim_cube = x % 6;
@@ -119,14 +119,29 @@ void loop() {
           pulsado_start = 1;
         }
       }
-    
-    
+      break;
+
     case 1:
-      for (int x = 0; x < 145; x++) {
-        int anim_rot = (x/11) % 8;
-        LCD_Sprite(x, 53, 32, 32, rotating, 8, anim_rot, 0, 0);
+      for (int x = 0; x < 72; x++) {
+        int anim_rot = (x / 9) % 8;
+        y = 2 * x;
+        LCD_Sprite(y, 53, 32, 32, rotating, 8, anim_rot, 0, 0);
+        FillRect(y - 1, 53, 1, 32, 0x00);
         delay(50);
       }
+      estado++;
+      coordx = 144;
+      coordy = 53;
+      break;
+    case 2:
+      for (int x = 0; x < 320; x++) {
+        int anim_rot = (x / 80) % 8;
+        LCD_Sprite(coordx, coordy, 32, 32, rotating, 8, anim_rot, 0, 0);
+        FillRect(coordx - 1, coordy, 1, 32, 0x00);
+
+      }
+
+      break;
 
   }
 
