@@ -32,7 +32,7 @@
 int DPINS[] = {PB_0, PB_1, PB_2, PB_3, PB_4, PB_5, PB_6, PB_7};
 int estado = 0;
 int pulsado_start = 0;
-int push1 = 1;
+int push1;
 int y = 0;
 //***************************************************************************************************************************************
 // Functions Prototypes
@@ -59,6 +59,7 @@ void setup() {
   Serial.begin(9600);
   GPIOPadConfigSet(GPIO_PORTB_BASE, 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7, GPIO_STRENGTH_8MA, GPIO_PIN_TYPE_STD_WPU);
   pinMode(PF_4, INPUT_PULLUP);
+  pinMode(PF_0, INPUT_PULLUP);
   LCD_Init();
   LCD_Clear(0x00);
   String ponce = "Jose Ponce";
@@ -118,9 +119,14 @@ void loop() {
           pulsado_start = 1;
         }
       }
-    //case 1:
-      //LCD_Sprite(0, 53, 32, 32, rotating, 8, etapa, 0, 0);
-
+    
+    
+    case 1:
+      for (int x = 0; x < 145; x++) {
+        int anim_rot = (x/11) % 8;
+        LCD_Sprite(x, 53, 32, 32, rotating, 8, anim_rot, 0, 0);
+        delay(50);
+      }
 
   }
 
