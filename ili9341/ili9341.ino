@@ -130,45 +130,53 @@ void loop() {
         delay(50);
       }
       estado++;
+      coordx = 144;
+      coordy = 53;
 
       break;
     case 2:
-      coordx = 144;
-      coordy = 53;
+
       for (int x = 0; x < 680; x++) {
         int anim_rot = (x / 80) % 8;
         LCD_Sprite(coordx, coordy, 32, 32, rotating, 8, anim_rot, 0, 0);
         V_line(coordx - 1, coordy, 32, 0x00);
         push1 = digitalRead(PF_4);
+        
         while (push1 == 0) {
+          push1 = digitalRead(PF_4);
           switch (anim_rot) {
             case 0:
-              LCD_Sprite(coordx, coordy++, 32, 32, rotating, 8, anim_rot, 0, 0);
+              LCD_Sprite(coordx, coordy--, 32, 32, rotating, 8, anim_rot, 0, 0);
               break;
             case 1:
-              LCD_Sprite(coordx--, coordy++, 32, 32, rotating, 8, anim_rot, 0, 0);
+              LCD_Sprite(coordx--, coordy--, 32, 32, rotating, 8, anim_rot, 0, 0);
               break;
             case 2:
               LCD_Sprite(coordx--, coordy, 32, 32, rotating, 8, anim_rot, 0, 0);
+              V_line(coordx + 32, coordy, 32, 0x00);
               break;
             case 3:
-              LCD_Sprite(coordx--, coordy--, 32, 32, rotating, 8, anim_rot, 0, 0);
+              LCD_Sprite(coordx--, coordy++, 32, 32, rotating, 8, anim_rot, 0, 0);
+              H_line(coordx, coordy - 1, 32, 0x00);
               break;
             case 4:
-              LCD_Sprite(coordx, coordy--, 32, 32, rotating, 8, anim_rot, 0, 0);
+              LCD_Sprite(coordx, coordy++, 32, 32, rotating, 8, anim_rot, 0, 0);
               break;
             case 5:
-              LCD_Sprite(coordx++, coordy--, 32, 32, rotating, 8, anim_rot, 0, 0);
+              LCD_Sprite(coordx++, coordy++, 32, 32, rotating, 8, anim_rot, 0, 0);
+              V_line(coordx - 1, coordy, 32, 0x00);
+              H_line(coordx, coordy - 1, 32, 0x00);
               break;
             case 6:
               LCD_Sprite(coordx++, coordy, 32, 32, rotating, 8, anim_rot, 0, 0);
               break;
             case 7:
-              LCD_Sprite(coordx++, coordy++, 32, 32, rotating, 8, anim_rot, 0, 0);
+              LCD_Sprite(coordx++, coordy--, 32, 32, rotating, 8, anim_rot, 0, 0);
+              V_line(coordx - 1, coordy, 32, 0x00);
+              H_line(coordx, coordy + 32, 32, 0x00);
               break;
             default:
               break;
-              push1 = digitalRead(PF_4);
           }
         }
 
