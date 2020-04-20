@@ -130,14 +130,16 @@ void loop() {
         delay(50);
       }
       estado++;
-      coordx = 144;
-      coordy = 53;
+      
       break;
     case 2:
+      coordx = 144;
+      coordy = 53;
       for (int x = 0; x < 320; x++) {
         int anim_rot = (x / 80) % 8;
         LCD_Sprite(coordx, coordy, 32, 32, rotating, 8, anim_rot, 0, 0);
         FillRect(coordx - 1, coordy, 1, 32, 0x00);
+        estado = 2;
 
       }
 
