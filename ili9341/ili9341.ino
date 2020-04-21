@@ -35,6 +35,9 @@ int pulsado_start = 0;
 int push1 = 1;
 int y = 0;
 int coordx, coordy;
+int astranh, astranv;
+int asty = 200;
+int astx = 200;
 //***************************************************************************************************************************************
 // Functions Prototypes
 //***************************************************************************************************************************************
@@ -61,6 +64,7 @@ void setup() {
   GPIOPadConfigSet(GPIO_PORTB_BASE, 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7, GPIO_STRENGTH_8MA, GPIO_PIN_TYPE_STD_WPU);
   pinMode(PF_4, INPUT_PULLUP);
   pinMode(PF_0, INPUT_PULLUP);
+  randomSeed(42);
   LCD_Init();
   LCD_Clear(0x00);
   /*String ponce = "Jose Ponce";
@@ -132,18 +136,33 @@ void loop() {
       estado++;
       coordx = 144;
       coordy = 53;
+      //astranh = random(0, 10);
+      //astranv = random(0, no se);
+
 
       break;
     case 2:
-
+      //LCD_Sprite(0, asty, 32, 32, asteroide, 1, 0, 0, 0);
+      asty = asty - 5;
       for (int x = 0; x < 680; x++) {
         int anim_rot = (x / 80) % 8;
         LCD_Sprite(coordx, coordy, 32, 32, rotating, 8, anim_rot, 0, 0);
         V_line(coordx - 1, coordy, 32, 0x00);
         push1 = digitalRead(PF_4);
-        
+
         while (push1 == 0) {
           push1 = digitalRead(PF_4);
+          if (coordx > 287) {
+            coordx = 287;
+          } else if (coordx < 1) {
+            coordx = 1;
+          }
+
+          if (coordy > 208) {
+            coordy = 208;
+          } else if (coordy < 1) {
+            coordy = 1;
+          }
           switch (anim_rot) {
             case 0:
               LCD_Sprite(coordx, coordy--, 32, 32, rotating, 8, anim_rot, 0, 0);
