@@ -36,8 +36,9 @@ int push1 = 1;
 int y = 0;
 int coordx, coordy;
 int astranh, astranv;
-int asty = 200;
-int astx = 200;
+int asty = 240;
+int astx = 0;
+String game_over = "Game over";
 //***************************************************************************************************************************************
 // Functions Prototypes
 //***************************************************************************************************************************************
@@ -51,9 +52,11 @@ void V_line(unsigned int x, unsigned int y, unsigned int l, unsigned int c);
 void Rect(unsigned int x, unsigned int y, unsigned int w, unsigned int h, unsigned int c);
 void FillRect(unsigned int x, unsigned int y, unsigned int w, unsigned int h, unsigned int c);
 void LCD_Print(String text, int x, int y, int fontSize, int color, int background);
-
+void mover_asteroide(void);
 void LCD_Bitmap(unsigned int x, unsigned int y, unsigned int width, unsigned int height, unsigned char bitmap[]);
 void LCD_Sprite(int x, int y, int width, int height, unsigned char bitmap[], int columns, int index, char flip, char offset);
+
+extern uint8_t asteroide[];
 
 //***************************************************************************************************************************************
 // Inicializacion
@@ -61,10 +64,12 @@ void LCD_Sprite(int x, int y, int width, int height, unsigned char bitmap[], int
 void setup() {
   SysCtlClockSet(SYSCTL_SYSDIV_2_5 | SYSCTL_USE_PLL | SYSCTL_OSC_MAIN | SYSCTL_XTAL_16MHZ);
   Serial.begin(9600);
+
   GPIOPadConfigSet(GPIO_PORTB_BASE, 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7, GPIO_STRENGTH_8MA, GPIO_PIN_TYPE_STD_WPU);
+  randomSeed(analogRead(0));
   pinMode(PF_4, INPUT_PULLUP);
   pinMode(PF_0, INPUT_PULLUP);
-  randomSeed(42);
+  randomSeed(420);
   LCD_Init();
   LCD_Clear(0x00);
   /*String ponce = "Jose Ponce";
@@ -101,9 +106,9 @@ void loop() {
       for (int x = 0; x < 42; x++) {
         push1 = digitalRead(PF_4);
         delay(100);
-        if (pulsado_start == 1 && push1 == 1) {
+        if (pulsado_start == 1 && push1 == 1 && estado == 0) {
           x = 0;
-          estado++;
+          estado = 1;
           pulsado_start = 0;
         }
         int anim_cube = x % 6;
@@ -136,20 +141,20 @@ void loop() {
       estado++;
       coordx = 144;
       coordy = 53;
-      //astranh = random(0, 10);
-      //astranv = random(0, no se);
-
+      astranh = random(0, 10);
 
       break;
     case 2:
-      //LCD_Sprite(0, asty, 32, 32, asteroide, 1, 0, 0, 0);
-      asty = asty - 5;
+
       for (int x = 0; x < 680; x++) {
-        int anim_rot = (x / 80) % 8;
+        mover_asteroide();
+        int anim_rot = (x / 20) % 8;
         LCD_Sprite(coordx, coordy, 32, 32, rotating, 8, anim_rot, 0, 0);
         V_line(coordx - 1, coordy, 32, 0x00);
         push1 = digitalRead(PF_4);
-
+        if (estado == 3) {
+          goto gameover;
+        }
         while (push1 == 0) {
           push1 = digitalRead(PF_4);
           if (coordx > 287) {
@@ -163,36 +168,45 @@ void loop() {
           } else if (coordy < 1) {
             coordy = 1;
           }
+
           switch (anim_rot) {
             case 0:
               LCD_Sprite(coordx, coordy--, 32, 32, rotating, 8, anim_rot, 0, 0);
+              mover_asteroide();
               break;
             case 1:
               LCD_Sprite(coordx--, coordy--, 32, 32, rotating, 8, anim_rot, 0, 0);
+              mover_asteroide();
               break;
             case 2:
               LCD_Sprite(coordx--, coordy, 32, 32, rotating, 8, anim_rot, 0, 0);
               V_line(coordx + 32, coordy, 32, 0x00);
+              mover_asteroide();
               break;
             case 3:
               LCD_Sprite(coordx--, coordy++, 32, 32, rotating, 8, anim_rot, 0, 0);
               H_line(coordx, coordy - 1, 32, 0x00);
+              mover_asteroide();
               break;
             case 4:
               LCD_Sprite(coordx, coordy++, 32, 32, rotating, 8, anim_rot, 0, 0);
+              mover_asteroide();
               break;
             case 5:
               LCD_Sprite(coordx++, coordy++, 32, 32, rotating, 8, anim_rot, 0, 0);
               V_line(coordx - 1, coordy, 32, 0x00);
               H_line(coordx, coordy - 1, 32, 0x00);
+              mover_asteroide();
               break;
             case 6:
               LCD_Sprite(coordx++, coordy, 32, 32, rotating, 8, anim_rot, 0, 0);
+              mover_asteroide();
               break;
             case 7:
               LCD_Sprite(coordx++, coordy--, 32, 32, rotating, 8, anim_rot, 0, 0);
               V_line(coordx - 1, coordy, 32, 0x00);
               H_line(coordx, coordy + 32, 32, 0x00);
+              mover_asteroide();
               break;
             default:
               break;
@@ -200,60 +214,34 @@ void loop() {
         }
 
       }
-
+gameover:
       break;
+    case 3:
 
+      LCD_Print(game_over, 80, 60, 2, 0xffff, 0x0000);
+      break;
   }
 
-  /*
-    for(int x = 0; x <320-32; x++){
-    delay(15);
-    int anim2 = (x/35)%2;
-
-    LCD_Sprite(x,100,16,24,planta,2,anim2,0,1);
-    V_line( x -1, 100, 24, 0x421b);
-
-    //LCD_Bitmap(x, 100, 32, 32, prueba);
-
-    int anim = (x/11)%8;
-
-
-    int anim3 = (x/11)%4;
-
-    LCD_Sprite(x, 20, 16, 32, mario,8, anim,1, 0);
-    V_line( x -1, 20, 32, 0x421b);
-
-    //LCD_Sprite(x,100,32,32,bowser,4,anim3,0,1);
-    //V_line( x -1, 100, 32, 0x421b);
-
-
-    LCD_Sprite(x, 140, 16, 16, enemy,2, anim2,1, 0);
-    V_line( x -1, 140, 16, 0x421b);
-
-    LCD_Sprite(x, 175, 16, 32, luigi,8, anim,1, 0);
-    V_line( x -1, 175, 32, 0x421b);
-    }
-    for(int x = 320-32; x >0; x--){
-    delay(5);
-    int anim = (x/11)%8;
-    int anim2 = (x/11)%2;
-
-    LCD_Sprite(x,100,16,24,planta,2,anim2,0,0);
-    V_line( x + 16, 100, 24, 0x421b);
-
-    //LCD_Bitmap(x, 100, 32, 32, prueba);
-
-    //LCD_Sprite(x, 140, 16, 16, enemy,2, anim2,0, 0);
-    //V_line( x + 16, 140, 16, 0x421b);
-
-    //LCD_Sprite(x, 175, 16, 32, luigi,8, anim,0, 0);
-    //V_line( x + 16, 175, 32, 0x421b);
-
-    //LCD_Sprite(x, 20, 16, 32, mario,8, anim,0, 0);
-    //V_line( x + 16, 20, 32, 0x421b);
-    }
-  */
 }
+
+void mover_asteroide(void) {
+  if (asty <= -32) {
+    H_line(0, 0, 320, 0x00);
+    astranh = random(0, 10);
+    asty = 240;
+  }
+  astx = astranh * 32;
+  LCD_Sprite(astx, asty, 32, 32, asteroide, 1, 0, 0, 0);
+  H_line(astx, asty + 32, 32, 0x00);
+  asty = asty - 1;
+  if (((astx + 32) > coordx + 5) && ((astx + 32) < coordx + 59)) {
+    if (((asty + 32) > coordy + 5) && ((asty + 32) < coordy + 59)) {
+      estado = 3;
+    }
+  }
+}
+
+
 //***************************************************************************************************************************************
 // FunciÃ³n para inicializar LCD
 //***************************************************************************************************************************************
