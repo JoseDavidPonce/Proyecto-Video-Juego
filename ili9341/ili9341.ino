@@ -34,15 +34,21 @@ int estado = 0;
 int pulsado_start = 0;
 int push1 = 1;
 int y = 0;
+int velocidad_gas = 0;
 int coordx, coordy;
 int astranh, astranv;
 int asty = 240;
 int astx = 0;
+int decadencia_gas = 0;
 String game_over = "Game over";
+String text1 = "Quetzal I";
+String ini_text = "Press START";
+String dot = ".";
 //***************************************************************************************************************************************
 // Functions Prototypes
 //***************************************************************************************************************************************
 void LCD_Init(void);
+void menu_principal(void);
 void LCD_CMD(uint8_t cmd);
 void LCD_DATA(uint8_t data);
 void SetWindows(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2);
@@ -69,7 +75,7 @@ void setup() {
   randomSeed(analogRead(0));
   pinMode(PF_4, INPUT_PULLUP);
   pinMode(PF_0, INPUT_PULLUP);
-  randomSeed(420);
+  randomSeed(105);
   LCD_Init();
   LCD_Clear(0x00);
   /*String ponce = "Jose Ponce";
@@ -77,20 +83,7 @@ void setup() {
     LCD_Print(ponce, 80, 60, 2, 0xffff, 0x0000);
     LCD_Print(isra, 50, 130, 2, 0xffff, 0x0000);
     delay(2000);*/
-  LCD_Clear(0x00);
-  String text1 = "Quetzal I";
-  String ini_text = "Press START";
-  String dot = ".";
-  LCD_Print(text1, 100, 90, 2, 0xffff, 0x0000);
-  LCD_Print(ini_text, 80, 150, 2, 0xffff, 0x0000);
-
-  LCD_Print(dot, 20, 20, 1, 0xffff, 0x0000);
-  LCD_Print(dot, 100, 180, 1, 0xffff, 0x0000);
-  LCD_Print(dot, 60, 10, 1, 0xffff, 0x0000);
-  LCD_Print(dot, 300, 200, 1, 0xffff, 0x0000);
-  LCD_Print(dot, 270, 80, 1, 0xffff, 0x0000);
-  LCD_Print(dot, 10, 220, 1, 0xffff, 0x0000);
-  LCD_Print(dot, 230, 40, 1, 0xffff, 0x0000);
+  menu_principal ();
 
   //LCD_Sprite(int x, int y, int width, int height, unsigned char bitmap[],int columns, int index, char flip, char offset);
 
@@ -141,7 +134,11 @@ void loop() {
       estado++;
       coordx = 144;
       coordy = 53;
-      astranh = random(0, 10);
+      astx = random(0, 268);
+      FillRect(300, 0, 20, 240, 0x6B6D);
+      FillRect(306, 20, 10, 100, 0x55A6);
+      V_line(305, 20, 100, 0x0000);
+
 
       break;
     case 2:
@@ -149,16 +146,20 @@ void loop() {
       for (int x = 0; x < 680; x++) {
         mover_asteroide();
         int anim_rot = (x / 20) % 8;
+
+
         LCD_Sprite(coordx, coordy, 32, 32, rotating, 8, anim_rot, 0, 0);
         V_line(coordx - 1, coordy, 32, 0x00);
         push1 = digitalRead(PF_4);
+
         if (estado == 3) {
           goto gameover;
         }
+
         while (push1 == 0) {
           push1 = digitalRead(PF_4);
-          if (coordx > 287) {
-            coordx = 287;
+          if (coordx > 255) {
+            coordx = 255;
           } else if (coordx < 1) {
             coordx = 1;
           }
@@ -168,45 +169,41 @@ void loop() {
           } else if (coordy < 1) {
             coordy = 1;
           }
-
+          velocidad_gas++;
+          gasolina(velocidad_gas);
+          mover_asteroide();
           switch (anim_rot) {
+
             case 0:
               LCD_Sprite(coordx, coordy--, 32, 32, rotating, 8, anim_rot, 0, 0);
-              mover_asteroide();
+              V_line(coordx + 32, coordy, 32, 0x00);
               break;
             case 1:
               LCD_Sprite(coordx--, coordy--, 32, 32, rotating, 8, anim_rot, 0, 0);
-              mover_asteroide();
               break;
             case 2:
               LCD_Sprite(coordx--, coordy, 32, 32, rotating, 8, anim_rot, 0, 0);
               V_line(coordx + 32, coordy, 32, 0x00);
-              mover_asteroide();
               break;
             case 3:
               LCD_Sprite(coordx--, coordy++, 32, 32, rotating, 8, anim_rot, 0, 0);
               H_line(coordx, coordy - 1, 32, 0x00);
-              mover_asteroide();
               break;
             case 4:
               LCD_Sprite(coordx, coordy++, 32, 32, rotating, 8, anim_rot, 0, 0);
-              mover_asteroide();
               break;
             case 5:
               LCD_Sprite(coordx++, coordy++, 32, 32, rotating, 8, anim_rot, 0, 0);
               V_line(coordx - 1, coordy, 32, 0x00);
               H_line(coordx, coordy - 1, 32, 0x00);
-              mover_asteroide();
               break;
             case 6:
               LCD_Sprite(coordx++, coordy, 32, 32, rotating, 8, anim_rot, 0, 0);
-              mover_asteroide();
               break;
             case 7:
               LCD_Sprite(coordx++, coordy--, 32, 32, rotating, 8, anim_rot, 0, 0);
               V_line(coordx - 1, coordy, 32, 0x00);
               H_line(coordx, coordy + 32, 32, 0x00);
-              mover_asteroide();
               break;
             default:
               break;
@@ -217,20 +214,49 @@ void loop() {
 gameover:
       break;
     case 3:
-
       LCD_Print(game_over, 80, 60, 2, 0xffff, 0x0000);
+      LCD_Print(ini_text, 60, 200, 2, 0xffff, 0x0000);
+      decadencia_gas = 0;
+      push1 = digitalRead(PF_4);
+      if (push1 == 0) {
+        estado = 0;
+        menu_principal();
+        delay(500);
+      }
+
       break;
   }
+}
+void gasolina (uint16_t a) {
+  if ( (a % 5) == 1) {
+    H_line(306, 20 + decadencia_gas, 10, 0x6B6D);
+    decadencia_gas++;
+    if (decadencia_gas > 100) {
+      estado = 3;
+    }
+  }
+}
+void menu_principal(void) {
+  LCD_Clear(0x00);
 
+  LCD_Print(text1, 100, 90, 2, 0xffff, 0x0000);
+  LCD_Print(ini_text, 80, 150, 2, 0xffff, 0x0000);
+
+  LCD_Print(dot, 20, 20, 1, 0xffff, 0x0000);
+  LCD_Print(dot, 100, 180, 1, 0xffff, 0x0000);
+  LCD_Print(dot, 60, 10, 1, 0xffff, 0x0000);
+  LCD_Print(dot, 300, 200, 1, 0xffff, 0x0000);
+  LCD_Print(dot, 270, 80, 1, 0xffff, 0x0000);
+  LCD_Print(dot, 10, 220, 1, 0xffff, 0x0000);
+  LCD_Print(dot, 230, 40, 1, 0xffff, 0x0000);
 }
 
 void mover_asteroide(void) {
   if (asty <= -32) {
     H_line(0, 0, 320, 0x00);
-    astranh = random(0, 10);
+    astx = random(0, 268);
     asty = 240;
   }
-  astx = astranh * 32;
   LCD_Sprite(astx, asty, 32, 32, asteroide, 1, 0, 0, 0);
   H_line(astx, asty + 32, 32, 0x00);
   asty = asty - 1;
