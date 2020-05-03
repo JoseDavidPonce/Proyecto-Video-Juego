@@ -40,6 +40,8 @@ int astranh, astranv;
 int asty = 240;
 int astx = 0;
 int decadencia_gas = 0;
+int active_gas = 0;
+int coordgasx, coordgasy;
 String game_over = "Game over";
 String text1 = "Quetzal I";
 String ini_text = "Press START";
@@ -61,9 +63,10 @@ void LCD_Print(String text, int x, int y, int fontSize, int color, int backgroun
 void mover_asteroide(void);
 void LCD_Bitmap(unsigned int x, unsigned int y, unsigned int width, unsigned int height, unsigned char bitmap[]);
 void LCD_Sprite(int x, int y, int width, int height, unsigned char bitmap[], int columns, int index, char flip, char offset);
+void sumar_gas(uint8_t a);
 
 extern uint8_t asteroide[];
-
+extern uint8_t gas_can[];
 //***************************************************************************************************************************************
 // Inicializacion
 //***************************************************************************************************************************************
@@ -155,7 +158,29 @@ void loop() {
         if (estado == 3) {
           goto gameover;
         }
-
+        if (active_gas == 0) {
+          coordgasx = random(0, 268);
+          coordgasy = random(0, 208);
+          while (((coordgasx + 32) > astx) && ((coordgasx + 32) < astx + 64)) {
+            coordgasx = random(0, 268);
+          }
+          LCD_Sprite(coordgasx, coordgasy, 32, 32, gas_can, 1, 0, 0, 0);
+          active_gas = 1;
+        } else {
+          if (((coordgasx + 32) > astx ) && ((coordgasx + 32) < astx + 64)) {
+            if (((coordgasy + 32) > asty) && ((coordgasy + 32) < asty + 64)) {
+              FillRect(coordgasx, coordgasy, 32, 32, 0x00);
+              active_gas = 0;
+            }
+          }
+          if (((coordgasx + 32) > coordx ) && ((coordgasx + 32) < coordx + 64)) {
+            if (((coordgasy + 32) > coordy) && ((coordgasy + 32) < coordy + 64)) {
+              FillRect(coordgasx, coordgasy, 32, 32, 0x00);
+              active_gas = 0;
+              sumar_gas(decadencia_gas);
+            }
+          }
+        }
         while (push1 == 0) {
           push1 = digitalRead(PF_4);
           if (coordx > 255) {
@@ -169,6 +194,7 @@ void loop() {
           } else if (coordy < 1) {
             coordy = 1;
           }
+
           velocidad_gas++;
           gasolina(velocidad_gas);
           mover_asteroide();
@@ -217,6 +243,8 @@ gameover:
       LCD_Print(game_over, 80, 60, 2, 0xffff, 0x0000);
       LCD_Print(ini_text, 60, 200, 2, 0xffff, 0x0000);
       decadencia_gas = 0;
+      active_gas = 0;
+      asty = 0;
       push1 = digitalRead(PF_4);
       if (push1 == 0) {
         estado = 0;
@@ -226,6 +254,10 @@ gameover:
 
       break;
   }
+}
+void sumar_gas(uint8_t a) {
+  a = a - 25;
+  FillRect(306, a, 10, 100 - a, 0x55A6);
 }
 void gasolina (uint16_t a) {
   if ( (a % 5) == 1) {
