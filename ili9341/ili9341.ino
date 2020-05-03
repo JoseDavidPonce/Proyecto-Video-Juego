@@ -6,6 +6,9 @@
    IE3027: ElectrÃ³nica Digital 2 - 2019
 */
 //***************************************************************************************************************************************
+//***************************************************************************************************************************************
+// Librería incluídas en el proyecto
+//***************************************************************************************************************************************
 #include <stdint.h>
 #include <stdbool.h>
 #include <TM4C123GH6PM.h>
@@ -29,6 +32,10 @@
 #define LCD_RS PD_2
 #define LCD_WR PD_3
 #define LCD_RD PE_1
+
+//***************************************************************************************************************************************
+// Declaración de variables
+//***************************************************************************************************************************************
 int DPINS[] = {PB_0, PB_1, PB_2, PB_3, PB_4, PB_5, PB_6, PB_7};
 int estado = 0;
 int pulsado_start = 0;
@@ -46,8 +53,9 @@ String game_over = "Game over";
 String text1 = "Quetzal I";
 String ini_text = "Press START";
 String dot = ".";
+
 //***************************************************************************************************************************************
-// Functions Prototypes
+// Funciones Prototipo
 //***************************************************************************************************************************************
 void LCD_Init(void);
 void menu_principal(void);
@@ -71,40 +79,43 @@ extern uint8_t gas_can[];
 // Inicializacion
 //***************************************************************************************************************************************
 void setup() {
-  SysCtlClockSet(SYSCTL_SYSDIV_2_5 | SYSCTL_USE_PLL | SYSCTL_OSC_MAIN | SYSCTL_XTAL_16MHZ);
+  SysCtlClockSet(SYSCTL_SYSDIV_2_5 | SYSCTL_USE_PLL | SYSCTL_OSC_MAIN | SYSCTL_XTAL_16MHZ);//Configuración del reloj
   Serial.begin(9600);
 
   GPIOPadConfigSet(GPIO_PORTB_BASE, 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7, GPIO_STRENGTH_8MA, GPIO_PIN_TYPE_STD_WPU);
   randomSeed(analogRead(0));
+  //Configuración de las entradas de los botones
   pinMode(PF_4, INPUT_PULLUP);
   pinMode(PF_0, INPUT_PULLUP);
   randomSeed(105);
-  LCD_Init();
+  LCD_Init();//Inicialización de la LCD
   LCD_Clear(0x00);
   /*String ponce = "Jose Ponce";
     String isra = "Israel Arevalo";
     LCD_Print(ponce, 80, 60, 2, 0xffff, 0x0000);
     LCD_Print(isra, 50, 130, 2, 0xffff, 0x0000);
     delay(2000);*/
-  menu_principal ();
+  menu_principal ();//Mostrar la pantalla principal
 
   //LCD_Sprite(int x, int y, int width, int height, unsigned char bitmap[],int columns, int index, char flip, char offset);
 
   //LCD_Bitmap(unsigned int x, unsigned int y, unsigned int width, unsigned int height, unsigned char bitmap[]);
-
 }
+
 //***************************************************************************************************************************************
-// Loop Infinito
+// Ciclo de proceso principal
 //***************************************************************************************************************************************
 void loop() {
+  //Switch para saber el estado en el que se encuentra el juego
   switch (estado) {
+    //Caso de la pantalla de inicio del juego
     case 0:
       for (int x = 0; x < 42; x++) {
         push1 = digitalRead(PF_4);
         delay(100);
         if (pulsado_start == 1 && push1 == 1 && estado == 0) {
           x = 0;
-          estado = 1;
+          estado = 1;//Se cambia al estado siguiente
           pulsado_start = 0;
         }
         int anim_cube = x % 6;
@@ -126,6 +137,7 @@ void loop() {
       }
       break;
 
+    //Caso que muestra la pantalla cuando se está inicializando el juego
     case 1:
       for (int x = 0; x < 72; x++) {
         int anim_rot = (x / 9) % 8;
@@ -141,11 +153,10 @@ void loop() {
       FillRect(300, 0, 20, 240, 0x6B6D);
       FillRect(306, 20, 10, 100, 0x55A6);
       V_line(305, 20, 100, 0x0000);
-
-
       break;
-    case 2:
 
+    //Caso cuando ya se esté jugando en la pantalla
+    case 2:
       for (int x = 0; x < 680; x++) {
         mover_asteroide();
         int anim_rot = (x / 20) % 8;
@@ -198,34 +209,42 @@ void loop() {
           velocidad_gas++;
           gasolina(velocidad_gas);
           mover_asteroide();
+          //Casos para los movimientos del satélite
           switch (anim_rot) {
-
+            //Caso para que el satélite suba
             case 0:
               LCD_Sprite(coordx, coordy--, 32, 32, rotating, 8, anim_rot, 0, 0);
               V_line(coordx + 32, coordy, 32, 0x00);
               break;
+            //Caso para que el satélite vaya a la esquina superior izquierda
             case 1:
               LCD_Sprite(coordx--, coordy--, 32, 32, rotating, 8, anim_rot, 0, 0);
               break;
+              //Caso para que el satélite vaya a la izquierda
             case 2:
               LCD_Sprite(coordx--, coordy, 32, 32, rotating, 8, anim_rot, 0, 0);
               V_line(coordx + 32, coordy, 32, 0x00);
               break;
+            //Caso para que el satélite a la esquina inferior izquierda
             case 3:
               LCD_Sprite(coordx--, coordy++, 32, 32, rotating, 8, anim_rot, 0, 0);
               H_line(coordx, coordy - 1, 32, 0x00);
               break;
+            //Caso para que el satélite baje
             case 4:
               LCD_Sprite(coordx, coordy++, 32, 32, rotating, 8, anim_rot, 0, 0);
               break;
+            //Caso para que el satélite vaya a la esquina inferior derecha
             case 5:
               LCD_Sprite(coordx++, coordy++, 32, 32, rotating, 8, anim_rot, 0, 0);
               V_line(coordx - 1, coordy, 32, 0x00);
               H_line(coordx, coordy - 1, 32, 0x00);
               break;
+            //Caso para que el satélite vaya a la derecha
             case 6:
               LCD_Sprite(coordx++, coordy, 32, 32, rotating, 8, anim_rot, 0, 0);
               break;
+            //Caso para que el satélite vaya a la esquina superior derecha
             case 7:
               LCD_Sprite(coordx++, coordy--, 32, 32, rotating, 8, anim_rot, 0, 0);
               V_line(coordx - 1, coordy, 32, 0x00);
@@ -235,30 +254,39 @@ void loop() {
               break;
           }
         }
-
-      }
+}
 gameover:
       break;
-    case 3:
-      LCD_Print(game_over, 80, 60, 2, 0xffff, 0x0000);
-      LCD_Print(ini_text, 60, 200, 2, 0xffff, 0x0000);
-      decadencia_gas = 0;
-      active_gas = 0;
-      asty = 0;
-      push1 = digitalRead(PF_4);
-      if (push1 == 0) {
-        estado = 0;
-        menu_principal();
-        delay(500);
-      }
 
-      break;
+      //Caso de cuando se ha finalizado el juego
+      case 3:
+        LCD_Print(game_over, 80, 60, 2, 0xffff, 0x0000);
+        LCD_Print(ini_text, 60, 200, 2, 0xffff, 0x0000);
+        decadencia_gas = 0;
+        active_gas = 0;
+        asty = 0;
+        push1 = digitalRead(PF_4);
+        if (push1 == 0) {
+          estado = 0;
+          menu_principal();
+          delay(500);
+        }
+  
+        break;
   }
 }
+
+//***************************************************************************************************************************************
+// Función para añadir gas al gráfico de combustible
+//***************************************************************************************************************************************
 void sumar_gas(uint8_t a) {
   a = a - 25;
   FillRect(306, a, 10, 100 - a, 0x55A6);
 }
+
+//***************************************************************************************************************************************
+// Función para mostrar gráficamente el estado del tanque de combustible
+//***************************************************************************************************************************************
 void gasolina (uint16_t a) {
   if ( (a % 5) == 1) {
     H_line(306, 20 + decadencia_gas, 10, 0x6B6D);
@@ -268,6 +296,10 @@ void gasolina (uint16_t a) {
     }
   }
 }
+
+//***************************************************************************************************************************************
+// Función que muestra el menú principal del juego
+//***************************************************************************************************************************************
 void menu_principal(void) {
   LCD_Clear(0x00);
 
@@ -283,6 +315,9 @@ void menu_principal(void) {
   LCD_Print(dot, 230, 40, 1, 0xffff, 0x0000);
 }
 
+//***************************************************************************************************************************************
+// Función para que se muevan los asteroides mostrados en pantalla
+//***************************************************************************************************************************************
 void mover_asteroide(void) {
   if (asty <= -32) {
     H_line(0, 0, 320, 0x00);
@@ -301,7 +336,7 @@ void mover_asteroide(void) {
 
 
 //***************************************************************************************************************************************
-// FunciÃ³n para inicializar LCD
+// Función para inicializar la LCD
 //***************************************************************************************************************************************
 void LCD_Init(void) {
   pinMode(LCD_RST, OUTPUT);
@@ -313,7 +348,7 @@ void LCD_Init(void) {
     pinMode(DPINS[i], OUTPUT);
   }
   //****************************************
-  // Secuencia de InicializaciÃ³n
+  // Secuencia de inicialización
   //****************************************
   digitalWrite(LCD_CS, HIGH);
   digitalWrite(LCD_RS, HIGH);
@@ -409,8 +444,9 @@ void LCD_Init(void) {
   LCD_CMD(ILI9341_DISPON);    //Display on
   digitalWrite(LCD_CS, HIGH);
 }
+
 //***************************************************************************************************************************************
-// FunciÃ³n para enviar comandos a la LCD - parÃ¡metro (comando)
+// Función para enviar parámetros y comandos a la LCD
 //***************************************************************************************************************************************
 void LCD_CMD(uint8_t cmd) {
   digitalWrite(LCD_RS, LOW);
@@ -418,8 +454,9 @@ void LCD_CMD(uint8_t cmd) {
   GPIO_PORTB_DATA_R = cmd;
   digitalWrite(LCD_WR, HIGH);
 }
+
 //***************************************************************************************************************************************
-// FunciÃ³n para enviar datos a la LCD - parÃ¡metro (dato)
+// Función para enviar datos a la LCD
 //***************************************************************************************************************************************
 void LCD_DATA(uint8_t data) {
   digitalWrite(LCD_RS, HIGH);
@@ -427,8 +464,9 @@ void LCD_DATA(uint8_t data) {
   GPIO_PORTB_DATA_R = data;
   digitalWrite(LCD_WR, HIGH);
 }
+
 //***************************************************************************************************************************************
-// FunciÃ³n para definir rango de direcciones de memoria con las cuales se trabajara (se define una ventana)
+// Función para definir el rango en las que se trabajará
 //***************************************************************************************************************************************
 void SetWindows(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2) {
   LCD_CMD(0x2a); // Set_column_address 4 parameters
@@ -443,8 +481,9 @@ void SetWindows(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int 
   LCD_DATA(y2);
   LCD_CMD(0x2c); // Write_memory_start
 }
+
 //***************************************************************************************************************************************
-// FunciÃ³n para borrar la pantalla - parÃ¡metros (color)
+// Función para borrar la pantalla
 //***************************************************************************************************************************************
 void LCD_Clear(unsigned int c) {
   unsigned int x, y;
@@ -459,8 +498,9 @@ void LCD_Clear(unsigned int c) {
     }
   digitalWrite(LCD_CS, HIGH);
 }
+
 //***************************************************************************************************************************************
-// FunciÃ³n para dibujar una lÃ­nea horizontal - parÃ¡metros ( coordenada x, cordenada y, longitud, color)
+// Función para dibujar una línea horizontal
 //***************************************************************************************************************************************
 void H_line(unsigned int x, unsigned int y, unsigned int l, unsigned int c) {
   unsigned int i, j;
@@ -476,8 +516,9 @@ void H_line(unsigned int x, unsigned int y, unsigned int l, unsigned int c) {
   }
   digitalWrite(LCD_CS, HIGH);
 }
+
 //***************************************************************************************************************************************
-// FunciÃ³n para dibujar una lÃ­nea vertical - parÃ¡metros ( coordenada x, cordenada y, longitud, color)
+// Función para dibujar una línea vertical - parámetros ( coordenada x, cordenada y, longitud, color)
 //***************************************************************************************************************************************
 void V_line(unsigned int x, unsigned int y, unsigned int l, unsigned int c) {
   unsigned int i, j;
@@ -493,8 +534,9 @@ void V_line(unsigned int x, unsigned int y, unsigned int l, unsigned int c) {
   }
   digitalWrite(LCD_CS, HIGH);
 }
+
 //***************************************************************************************************************************************
-// FunciÃ³n para dibujar un rectÃ¡ngulo - parÃ¡metros ( coordenada x, cordenada y, ancho, alto, color)
+// Función para dibujar un rectángulo - parámetros ( coordenada x, cordenada y, ancho, alto, color)
 //***************************************************************************************************************************************
 void Rect(unsigned int x, unsigned int y, unsigned int w, unsigned int h, unsigned int c) {
   H_line(x  , y  , w, c);
@@ -502,8 +544,9 @@ void Rect(unsigned int x, unsigned int y, unsigned int w, unsigned int h, unsign
   V_line(x  , y  , h, c);
   V_line(x + w, y  , h, c);
 }
+
 //***************************************************************************************************************************************
-// FunciÃ³n para dibujar un rectÃ¡ngulo relleno - parÃ¡metros ( coordenada x, cordenada y, ancho, alto, color)
+// Función para dibujar un rectángulo relleno - parámetros ( coordenada x, cordenada y, ancho, alto, color)
 //***************************************************************************************************************************************
 void FillRect(unsigned int x, unsigned int y, unsigned int w, unsigned int h, unsigned int c) {
   unsigned int i;
@@ -512,8 +555,9 @@ void FillRect(unsigned int x, unsigned int y, unsigned int w, unsigned int h, un
     H_line(x  , y + i, w, c);
   }
 }
+
 //***************************************************************************************************************************************
-// FunciÃ³n para dibujar texto - parÃ¡metros ( texto, coordenada x, cordenada y, color, background)
+// Función para dibujar texto - parámetros ( texto, coordenada x, cordenada y, color, background)
 //***************************************************************************************************************************************
 void LCD_Print(String text, int x, int y, int fontSize, int color, int background) {
   int fontXSize ;
@@ -563,8 +607,9 @@ void LCD_Print(String text, int x, int y, int fontSize, int color, int backgroun
     digitalWrite(LCD_CS, HIGH);
   }
 }
+
 //***************************************************************************************************************************************
-// FunciÃ³n para dibujar una imagen a partir de un arreglo de colores (Bitmap) Formato (Color 16bit R 5bits G 6bits B 5bits)
+// Función para dibujar una imagen a partir de un arreglo de colores (Bitmap) Formato (Color 16bit R 5bits G 6bits B 5bits)
 //***************************************************************************************************************************************
 void LCD_Bitmap(unsigned int x, unsigned int y, unsigned int width, unsigned int height, unsigned char bitmap[]) {
   LCD_CMD(0x02c); // write_memory_start
@@ -588,8 +633,9 @@ void LCD_Bitmap(unsigned int x, unsigned int y, unsigned int width, unsigned int
   }
   digitalWrite(LCD_CS, HIGH);
 }
+
 //***************************************************************************************************************************************
-// FunciÃ³n para dibujar una imagen sprite - los parÃ¡metros columns = nÃºmero de imagenes en el sprite, index = cual desplegar, flip = darle vuelta
+// Función para dibujar una imagen sprite - los parámetros columns = número de imagenes en el sprite, index = cual desplegar, flip = darle vuelta
 //***************************************************************************************************************************************
 void LCD_Sprite(int x, int y, int width, int height, unsigned char bitmap[], int columns, int index, char flip, char offset) {
   LCD_CMD(0x02c); // write_memory_start
