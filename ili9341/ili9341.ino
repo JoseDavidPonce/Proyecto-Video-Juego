@@ -1,4 +1,19 @@
 //***************************************************************************************************************************************
+/*                  DOCUMENTACIÓN INTERNA
+ * Nombre proyecto: Proyecto Video Juego
+ * 
+ * Materia: Electrónica Digital 2
+ * 
+ * Año: 2020
+ * 
+ * Integrantes: José Ponce
+ *              Israel Arévalo
+ *              
+ */
+//***************************************************************************************************************************************
+
+
+//***************************************************************************************************************************************
 /* LibrerÃ­a para el uso de la pantalla ILI9341 en modo 8 bits
    Basado en el cÃ³digo de martinayotte - https://www.stm32duino.com/viewtopic.php?t=637
    AdaptaciÃ³n, migraciÃ³n y creaciÃ³n de nuevas funciones: Pablo Mazariegos y JosÃ© Morales
@@ -113,24 +128,28 @@ void loop() {
       for (int x = 0; x < 42; x++) {
         push1 = digitalRead(PF_4);
         delay(100);
+        //Sentencia para saber si se ha presionado el botón para iniciar el juego
         if (pulsado_start == 1 && push1 == 1 && estado == 0) {
           x = 0;
           estado = 1;//Se cambia al estado siguiente
           pulsado_start = 0;
         }
+        
         int anim_cube = x % 6;
-
+        //Sentencia para mover el sprite del satélite cuando se quiere iniciar el juego
         if (estado == 1) {
           y = 4 * x;
           LCD_Sprite(145 + y, 53, 32, 32, cubesat, 6, anim_cube, 0, 0);
+          //Setencia para poner el satélite en el medio de la pantalla
           if ( y > 135) {
             x = 42;
-            LCD_Clear(0x00);
+            LCD_Clear(0x00);//Se limpia la pantalla
           }
-        } else {
+        } 
+        else {
           LCD_Sprite(145, 53, 32, 32, cubesat, 6, anim_cube, 0, 0);
         }
-
+        //Antirrebote del botón para iniciar el juego
         if (push1 == 0 && pulsado_start == 0) {
           pulsado_start = 1;
         }
@@ -149,7 +168,7 @@ void loop() {
       estado++;
       coordx = 144;
       coordy = 53;
-      astx = random(0, 268);
+      astx = random(0, 268);//Se determina la posición de salida del nuevo asteroide
       FillRect(300, 0, 20, 240, 0x6B6D);
       FillRect(306, 20, 10, 100, 0x55A6);
       V_line(305, 20, 100, 0x0000);
@@ -160,8 +179,7 @@ void loop() {
       for (int x = 0; x < 680; x++) {
         mover_asteroide();
         int anim_rot = (x / 20) % 8;
-
-
+        
         LCD_Sprite(coordx, coordy, 32, 32, rotating, 8, anim_rot, 0, 0);
         V_line(coordx - 1, coordy, 32, 0x00);
         push1 = digitalRead(PF_4);
@@ -177,7 +195,8 @@ void loop() {
           }
           LCD_Sprite(coordgasx, coordgasy, 32, 32, gas_can, 1, 0, 0, 0);
           active_gas = 1;
-        } else {
+        } 
+        else {
           if (((coordgasx + 32) > astx ) && ((coordgasx + 32) < astx + 64)) {
             if (((coordgasy + 32) > asty) && ((coordgasy + 32) < asty + 64)) {
               FillRect(coordgasx, coordgasy, 32, 32, 0x00);
@@ -192,20 +211,21 @@ void loop() {
             }
           }
         }
+        //Sentencia para que se haga el movimiento mientras el botón este presionado
         while (push1 == 0) {
           push1 = digitalRead(PF_4);
+          //Programación defensiva para que el satélite no salga de la pantalla
           if (coordx > 255) {
             coordx = 255;
           } else if (coordx < 1) {
             coordx = 1;
           }
-
           if (coordy > 208) {
             coordy = 208;
           } else if (coordy < 1) {
             coordy = 1;
           }
-
+          //Modificación gráficamente del estado del combustible del satélite
           velocidad_gas++;
           gasolina(velocidad_gas);
           mover_asteroide();
@@ -250,6 +270,7 @@ void loop() {
               V_line(coordx - 1, coordy, 32, 0x00);
               H_line(coordx, coordy + 32, 32, 0x00);
               break;
+              //Caso por defecto
             default:
               break;
           }
@@ -257,7 +278,6 @@ void loop() {
 }
 gameover:
       break;
-
       //Caso de cuando se ha finalizado el juego
       case 3:
         LCD_Print(game_over, 80, 60, 2, 0xffff, 0x0000);
@@ -271,8 +291,7 @@ gameover:
           menu_principal();
           delay(500);
         }
-  
-        break;
+  break;
   }
 }
 
