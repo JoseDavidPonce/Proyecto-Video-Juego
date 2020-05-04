@@ -1,15 +1,15 @@
 //***************************************************************************************************************************************
 /*                  DOCUMENTACIÓN INTERNA
- * Nombre proyecto: Proyecto Video Juego
- * 
- * Materia: Electrónica Digital 2
- * 
- * Año: 2020
- * 
- * Integrantes: José Ponce
- *              Israel Arévalo
- *              
- */
+   Nombre proyecto: Proyecto Video Juego
+
+   Materia: Electrónica Digital 2
+
+   Año: 2020
+
+   Integrantes: José Ponce
+                Israel Arévalo
+
+*/
 //***************************************************************************************************************************************
 
 
@@ -72,6 +72,7 @@ String dot = ".";
 //***************************************************************************************************************************************
 // Funciones Prototipo
 //***************************************************************************************************************************************
+void chequear_gas(void);
 void LCD_Init(void);
 void menu_principal(void);
 void LCD_CMD(uint8_t cmd);
@@ -86,8 +87,9 @@ void LCD_Print(String text, int x, int y, int fontSize, int color, int backgroun
 void mover_asteroide(void);
 void LCD_Bitmap(unsigned int x, unsigned int y, unsigned int width, unsigned int height, unsigned char bitmap[]);
 void LCD_Sprite(int x, int y, int width, int height, unsigned char bitmap[], int columns, int index, char flip, char offset);
-void sumar_gas(uint8_t a);
+void sumar_gas(int *a);
 
+//Declaración de variables para uso en la memoria Flash
 extern uint8_t asteroide[];
 extern uint8_t gas_can[];
 //***************************************************************************************************************************************
@@ -102,7 +104,7 @@ void setup() {
   //Configuración de las entradas de los botones
   pinMode(PF_4, INPUT_PULLUP);
   pinMode(PF_0, INPUT_PULLUP);
-  randomSeed(105);
+  randomSeed(183);
   LCD_Init();//Inicialización de la LCD
   LCD_Clear(0x00);
   /*String ponce = "Jose Ponce";
@@ -134,7 +136,7 @@ void loop() {
           estado = 1;//Se cambia al estado siguiente
           pulsado_start = 0;
         }
-        
+
         int anim_cube = x % 6;
         //Sentencia para mover el sprite del satélite cuando se quiere iniciar el juego
         if (estado == 1) {
@@ -145,7 +147,7 @@ void loop() {
             x = 42;
             LCD_Clear(0x00);//Se limpia la pantalla
           }
-        } 
+        }
         else {
           LCD_Sprite(145, 53, 32, 32, cubesat, 6, anim_cube, 0, 0);
         }
@@ -179,7 +181,7 @@ void loop() {
       for (int x = 0; x < 680; x++) {
         mover_asteroide();
         int anim_rot = (x / 20) % 8;
-        
+
         LCD_Sprite(coordx, coordy, 32, 32, rotating, 8, anim_rot, 0, 0);
         V_line(coordx - 1, coordy, 32, 0x00);
         push1 = digitalRead(PF_4);
@@ -195,7 +197,7 @@ void loop() {
           }
           LCD_Sprite(coordgasx, coordgasy, 32, 32, gas_can, 1, 0, 0, 0);
           active_gas = 1;
-        } 
+        }
         else {
           if (((coordgasx + 32) > astx ) && ((coordgasx + 32) < astx + 64)) {
             if (((coordgasy + 32) > asty) && ((coordgasy + 32) < asty + 64)) {
@@ -203,13 +205,7 @@ void loop() {
               active_gas = 0;
             }
           }
-          if (((coordgasx + 32) > coordx ) && ((coordgasx + 32) < coordx + 64)) {
-            if (((coordgasy + 32) > coordy) && ((coordgasy + 32) < coordy + 64)) {
-              FillRect(coordgasx, coordgasy, 32, 32, 0x00);
-              active_gas = 0;
-              sumar_gas(decadencia_gas);
-            }
-          }
+          chequear_gas();
         }
         //Sentencia para que se haga el movimiento mientras el botón este presionado
         while (push1 == 0) {
@@ -240,7 +236,7 @@ void loop() {
             case 1:
               LCD_Sprite(coordx--, coordy--, 32, 32, rotating, 8, anim_rot, 0, 0);
               break;
-              //Caso para que el satélite vaya a la izquierda
+            //Caso para que el satélite vaya a la izquierda
             case 2:
               LCD_Sprite(coordx--, coordy, 32, 32, rotating, 8, anim_rot, 0, 0);
               V_line(coordx + 32, coordy, 32, 0x00);
@@ -270,44 +266,58 @@ void loop() {
               V_line(coordx - 1, coordy, 32, 0x00);
               H_line(coordx, coordy + 32, 32, 0x00);
               break;
-              //Caso por defecto
+            //Caso por defecto
             default:
               break;
           }
         }
-}
+      }
 gameover:
       break;
-      //Caso de cuando se ha finalizado el juego
-      case 3:
-        LCD_Print(game_over, 80, 60, 2, 0xffff, 0x0000);
-        LCD_Print(ini_text, 60, 200, 2, 0xffff, 0x0000);
-        decadencia_gas = 0;
-        active_gas = 0;
-        asty = 0;
-        push1 = digitalRead(PF_4);
-        if (push1 == 0) {
-          estado = 0;
-          menu_principal();
-          delay(500);
-        }
-  break;
+    //Caso de cuando se ha finalizado el juego
+    case 3:
+      LCD_Print(game_over, 80, 60, 2, 0xffff, 0x0000);
+      LCD_Print(ini_text, 60, 200, 2, 0xffff, 0x0000);
+      decadencia_gas = 0;
+      active_gas = 0;
+      asty = 208;
+      push1 = digitalRead(PF_4);
+      if (push1 == 0) {
+        estado = 0;
+        menu_principal();
+        delay(500);
+      }
+      break;
   }
 }
-
+//***************************************************************************************************************************************
+// Función para chequear si se tomó el gas
+//***************************************************************************************************************************************
+void chequear_gas() {
+  if (((coordgasx + 32) > coordx ) && ((coordgasx + 32) < coordx + 64)) {
+    if (((coordgasy + 32) > coordy) && ((coordgasy + 32) < coordy + 64)) {
+      FillRect(coordgasx, coordgasy, 32, 32, 0x00);
+      active_gas = 0;
+      sumar_gas(&decadencia_gas);
+    }
+  }
+}
 //***************************************************************************************************************************************
 // Función para añadir gas al gráfico de combustible
 //***************************************************************************************************************************************
-void sumar_gas(uint8_t a) {
-  a = a - 25;
-  FillRect(306, a, 10, 100 - a, 0x55A6);
+void sumar_gas(int  *a) {
+  *a = *a - 25;
+  if (*a <= 0) {
+    *a = 0;
+  }
+  FillRect(306, 20 + *a, 10, 100 - *a, 0x55A6);
 }
 
 //***************************************************************************************************************************************
 // Función para mostrar gráficamente el estado del tanque de combustible
 //***************************************************************************************************************************************
 void gasolina (uint16_t a) {
-  if ( (a % 5) == 1) {
+  if ( (a % 6) == 1) {
     H_line(306, 20 + decadencia_gas, 10, 0x6B6D);
     decadencia_gas++;
     if (decadencia_gas > 100) {
