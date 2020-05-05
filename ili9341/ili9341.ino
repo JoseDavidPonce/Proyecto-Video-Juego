@@ -42,6 +42,9 @@
 #include "font.h"
 #include "lcd_registers.h"
 
+#define note_g 391
+#define note_gS 415
+#define note_a 440
 #define LCD_RST PD_0
 #define LCD_CS PD_1
 #define LCD_RS PD_2
@@ -68,6 +71,7 @@ String game_over = "Game over";
 String text1 = "Quetzal I";
 String ini_text = "Press START";
 String dot = ".";
+int buzzerPin = 8;
 
 //***************************************************************************************************************************************
 // Funciones Prototipo
@@ -104,6 +108,7 @@ void setup() {
   //Configuración de las entradas de los botones
   pinMode(PF_4, INPUT_PULLUP);
   pinMode(PF_0, INPUT_PULLUP);
+  pinMode(buzzerPin, OUTPUT);
   randomSeed(183);
   LCD_Init();//Inicialización de la LCD
   LCD_Clear(0x00);
@@ -127,6 +132,7 @@ void loop() {
   switch (estado) {
     //Caso de la pantalla de inicio del juego
     case 0:
+      beep(note_gS, 500);
       for (int x = 0; x < 42; x++) {
         push1 = digitalRead(PF_4);
         delay(100);
@@ -187,6 +193,7 @@ void loop() {
         push1 = digitalRead(PF_4);
 
         if (estado == 3) {
+          beep(note_gS, 500);
           goto gameover;
         }
         if (active_gas == 0) {
@@ -325,7 +332,16 @@ void gasolina (uint16_t a) {
     }
   }
 }
-
+//***************************************************************************************************************************************
+// Funcion para tocar notas musicales
+//***************************************************************************************************************************************
+void beep(int note, int duration)
+{
+  tone(buzzerPin, note, duration / 2);
+  delay(duration / 2);
+  noTone(buzzerPin);
+  delay(duration / 2 + 20);
+}
 //***************************************************************************************************************************************
 // Función que muestra el menú principal del juego
 //***************************************************************************************************************************************
