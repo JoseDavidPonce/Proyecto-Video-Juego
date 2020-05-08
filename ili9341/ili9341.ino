@@ -43,7 +43,7 @@
 #include "lcd_registers.h"
 
 #define note_g 391
-#define note_gS 415
+#define note_gs 415
 #define note_a 440
 #define LCD_RST PD_0
 #define LCD_CS PD_1
@@ -71,7 +71,7 @@ String game_over = "Game over";
 String text1 = "Quetzal I";
 String ini_text = "Press START";
 String dot = ".";
-int buzzerPin = 8;
+int buzzerPin = PF_1;
 
 //***************************************************************************************************************************************
 // Funciones Prototipo
@@ -112,13 +112,13 @@ void setup() {
   randomSeed(183);
   LCD_Init();//Inicialización de la LCD
   LCD_Clear(0x00);
-  /*String ponce = "Jose Ponce";
-    String isra = "Israel Arevalo";
-    LCD_Print(ponce, 80, 60, 2, 0xffff, 0x0000);
-    LCD_Print(isra, 50, 130, 2, 0xffff, 0x0000);
-    delay(2000);*/
+  String ponce = "Jose Ponce";
+  String isra = "Israel Arevalo";
+  LCD_Print(ponce, 80, 60, 2, 0xffff, 0x0000);
+  LCD_Print(isra, 50, 130, 2, 0xffff, 0x0000);
+  delay(2000);
   menu_principal ();//Mostrar la pantalla principal
-
+  beep(note_g, 500);
   //LCD_Sprite(int x, int y, int width, int height, unsigned char bitmap[],int columns, int index, char flip, char offset);
 
   //LCD_Bitmap(unsigned int x, unsigned int y, unsigned int width, unsigned int height, unsigned char bitmap[]);
@@ -132,7 +132,6 @@ void loop() {
   switch (estado) {
     //Caso de la pantalla de inicio del juego
     case 0:
-      beep(note_gS, 500);
       for (int x = 0; x < 42; x++) {
         push1 = digitalRead(PF_4);
         delay(100);
@@ -193,7 +192,6 @@ void loop() {
         push1 = digitalRead(PF_4);
 
         if (estado == 3) {
-          beep(note_gS, 500);
           goto gameover;
         }
         if (active_gas == 0) {
@@ -303,6 +301,9 @@ gameover:
 void chequear_gas() {
   if (((coordgasx + 32) > coordx ) && ((coordgasx + 32) < coordx + 64)) {
     if (((coordgasy + 32) > coordy) && ((coordgasy + 32) < coordy + 64)) {
+      beep(note_g, 50);
+      beep(note_gs, 50);
+      beep(note_a, 50);
       FillRect(coordgasx, coordgasy, 32, 32, 0x00);
       active_gas = 0;
       sumar_gas(&decadencia_gas);
@@ -375,6 +376,9 @@ void mover_asteroide(void) {
   if (((astx + 32) > coordx + 5) && ((astx + 32) < coordx + 59)) {
     if (((asty + 32) > coordy + 5) && ((asty + 32) < coordy + 59)) {
       estado = 3;
+      beep(note_a, 100);
+      beep(note_gs, 100);
+      beep(note_g, 100);
     }
   }
 }
